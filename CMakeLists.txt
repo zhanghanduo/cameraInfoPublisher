@@ -1,24 +1,20 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(undistort_images)
-catkin_package()
-
-## Add support for C++11, supported in ROS Kinetic and newer
-# add_definitions(-std=c++11)
-add_executable(publishCameraInfo src/publishCameraInfo.cpp)
-#add_executable(makeRawImageSubPub src/makeRawImageSubPub.cpp)
-#add_executable(publishCameraInfoSnapcam src/publishCameraInfoSnapcam.cpp)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  std_msgs
+  geometry_msgs
+  sensor_msgs
+  message_filters
   camera_info_manager
+  image_transport
 )
 
-#target_link_libraries(makeRawImageSubPub ${catkin_LIBRARIES})
-target_link_libraries(publishCameraInfo ${catkin_LIBRARIES})
-#target_link_libraries(publishCameraInfoSnapcam ${catkin_LIBRARIES})
+catkin_package()
 
 ###################################
 ## catkin specific configuration ##
@@ -46,3 +42,11 @@ catkin_package(
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
+
+## Add support for C++11, supported in ROS Kinetic and newer
+# add_definitions(-std=c++11)
+add_executable(publishCameraInfo src/publishCameraInfo.cpp)
+target_link_libraries(publishCameraInfo ${catkin_LIBRARIES})
+
+add_executable(publishStereoCameraInfo src/publishStereoCameraInfo.cpp)
+target_link_libraries(publishStereoCameraInfo ${catkin_LIBRARIES})
