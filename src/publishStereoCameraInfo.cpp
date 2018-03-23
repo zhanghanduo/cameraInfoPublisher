@@ -19,71 +19,52 @@ class publishCameraInfo
 public:
   publishCameraInfo(const ros::NodeHandle &nh, const ros::NodeHandle &n): nh_(nh), n_(n)
   {
-      if(n_.getParam("topic/left_info", left_info_topic))
-          ROS_INFO("Get left image info topic: %s", left_info_topic.c_str());
-      else
-          ROS_WARN("Use default left image info topic: %s", left_info_topic.c_str());
+      n_.getParam ( "camfile_left", camname_left);  //camname is set by:  rosparam set camfile _____
 
-      if(n_.getParam("topic/right_info", right_info_topic))
-          ROS_INFO("Get right image info topic: %s", right_info_topic.c_str());
-      else
-          ROS_WARN("Use default right image info topic: %s", right_info_topic.c_str());
+      n_.getParam ( "camfile_right", camname_right);
 
-      pub_left_cam_info = nh_.advertise<sensor_msgs::CameraInfo>(left_info_topic, 1);
-      pub_right_cam_info = nh_.advertise<sensor_msgs::CameraInfo>(right_info_topic, 1);
+      pub_left_cam_info = nh_.advertise<sensor_msgs::CameraInfo>(camname_left + "/camera_info", 1);
 
-//      sub_left = nh_.subscribe("image_raw", 1, &publishCameraInfo::callback, this);
+      pub_right_cam_info = nh_.advertise<sensor_msgs::CameraInfo>(camname_right + "/camera_info", 1);
+
   }
   void callback(const sensor_msgs::ImageConstPtr& imgmsg1, const sensor_msgs::ImageConstPtr& imgmsg2)
   {
-    //  not matching camname to camera name in input file throws an error in camera_info_manager.
-    //  This error can be ignored.
-    //  const std::string camurl="file:///home/rnl/.ros/camera_info/snapcam1.yaml";
-    std::string camname_left, camname_right;
+      const std::string camnameConst_l = camname_left;
 
-    n_.getParam ( "camfile_left", camname_left);  //camname is set by:  rosparam set camfile _____
+      const std::string camnameConst_r = camname_right;
 
-    n_.getParam ( "camfile_right", camname_right);
+      const std::string camurlRead_l = "file://" + ros::package::getPath("undistort_images") + "/calib_files/" + camname_left + ".yaml";
 
-    const std::string camnameConst_l = camname_left;
+      const std::string camurlRead_r = "file://" + ros::package::getPath("undistort_images") + "/calib_files/" + camname_right + ".yaml";
 
-    const std::string camnameConst_r = camname_right;
+      camera_info_manager::CameraInfoManager caminfo_l(nh_, camnameConst_l, camurlRead_l);
 
-    const std::string camurlRead_l = "file://" + ros::package::getPath("undistort_images") + "/calib_files/" + camname_left + ".yaml";
+      camera_info_manager::CameraInfoManager caminfo_r(nh_, camnameConst_r, camurlRead_r);
 
-    const std::string camurlRead_r = "file://" + ros::package::getPath("undistort_images") + "/calib_files/" + camname_right + ".yaml";
+      ci_left = caminfo_l.getCameraInfo();
 
-    camera_info_manager::CameraInfoManager caminfo_l(nh_, camnameConst_l, camurlRead_l);
+      ci_right = caminfo_r.getCameraInfo();
 
-    camera_info_manager::CameraInfoManager caminfo_r(nh_, camnameConst_r, camurlRead_r);
+      ci_left.header.stamp = imgmsg1->header.stamp;
+      ci_left.header.frame_id = imgmsg1->header.frame_id;
 
-//    sensor_msgs::CameraInfoPtr ci(new sensor_msgs::CameraInfo(caminfo->getCameraInfo()));  //copied
-//    camera_info_manager::CameraInfoManager caminfo(n_, camname);
-    sensor_msgs::CameraInfo ci_left, ci_right;
+      ci_right.header.stamp = imgmsg2->header.stamp;
+      ci_right.header.frame_id = imgmsg2->header.frame_id;
 
-    ci_left = caminfo_l.getCameraInfo();
-
-    ci_left.header.stamp = imgmsg1->header.stamp;
-    ci_left.header.frame_id = imgmsg1->header.frame_id;
-
-    ci_right = caminfo_r.getCameraInfo();
-
-    ci_right.header.stamp = imgmsg2->header.stamp;
-    ci_right.header.frame_id = imgmsg2->header.frame_id;
-    
-    // Publish via image_transport
-    pub_left_cam_info.publish(ci_left);
-    pub_right_cam_info.publish(ci_right);
+      // Publish via image_transport
+      pub_left_cam_info.publish(ci_left);
+      pub_right_cam_info.publish(ci_right);
   }
 
   private:
   ros::NodeHandle n_,nh_;
+
   ros::Publisher pub_left_cam_info, pub_right_cam_info;
-//  ros::Subscriber sub_left, sub_right;
 
-  string left_info_topic = "/wide/left/camera_info";
-  string right_info_topic = "/wide/right/camera_info";
+  string left_info_topic, right_info_topic, camname_left, camname_right;
 
+  sensor_msgs::CameraInfo ci_left, ci_right;
 };//End of class
 
 int main(int argc, char **argv)

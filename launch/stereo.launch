@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<launch>
+    <param name="use_sim_time" value="false" />
+    <arg name="info_topic" value="/camera_info"/>
+    <arg name="left_image_topic" value="/wide/left/image_raw"/>
+    <arg name="right_image_topic" value="/wide/right/image_raw"/>
+    <arg name="queue_size_img" value="1"/>
+    <arg name="queue_size_imu" value="10"/>
+    <arg name="my_ns" value="/wide"/>
+
+    <group ns="$(arg my_ns)">
+    <node pkg="undistort_images" type="publishCameraInfo" name="publishCameraInfo_left">
+        <param name="topic/info" value="$(arg info_topic)" />
+        <param name="topic/img" value="$(arg left_image_topic)" />
+        <param name="camfile" value="left" />
+        <param name="queue_size/img" value="$(arg queue_size_img)" />
+        <param name="queue_size/imu" value="$(arg queue_size_imu)" />
+    </node>
+
+    <node pkg="undistort_images" type="publishCameraInfo" name="publishCameraInfo_right">
+        <param name="topic/info" value="$(arg info_topic)" />
+        <param name="topic/img" value="$(arg right_image_topic)" />
+        <param name="camfile" value="right" />
+        <param name="queue_size/img" value="$(arg queue_size_img)" />
+        <param name="queue_size/imu" value="$(arg queue_size_imu)" />
+    </node>
+    </group>
+</launch>

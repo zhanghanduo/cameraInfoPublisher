@@ -21,6 +21,8 @@ public:
   {
       string img_topic = "/camera_raw";
 
+      n_.getParam ( "camfile", camname);  //camname is set by:  rosparam set camfile _____
+
       if(n_.getParam("topic/img", img_topic))
           ROS_INFO("Get image info topic: %s", img_topic.c_str());
       else
@@ -30,18 +32,12 @@ public:
       else
           ROS_WARN("Use default image info topic: %s", info_topic.c_str());
 
-      pub_cam_info = nh_.advertise<sensor_msgs::CameraInfo>(info_topic, 1);
+      pub_cam_info = nh_.advertise<sensor_msgs::CameraInfo>(camname + info_topic, 1);
 
       sub_img = nh_.subscribe(img_topic, 1, &publishCameraInfo::callback, this);
   }
   void callback(const sensor_msgs::ImageConstPtr& imgmsg)
   {
-    //  not matching camname to camera name in input file throws an error in camera_info_manager.
-    //  This error can be ignored.
-    //  const std::string camurl="file:///home/rnl/.ros/camera_info/snapcam1.yaml";
-    std::string camname;
-
-    n_.getParam ( "camfile", camname);  //camname is set by:  rosparam set camfile _____
 
     const std::string camnameConst = camname;
 
@@ -65,7 +61,7 @@ public:
   ros::Publisher pub_cam_info;
   ros::Subscriber sub_img;
 
-  string info_topic = "/camera_info";
+  string info_topic, camname;
 
 };//End of class
 

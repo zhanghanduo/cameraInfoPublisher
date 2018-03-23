@@ -1,6 +1,6 @@
 image_width: 640
 image_height: 422
-camera_name: stereo_right
+camera_name: right
 camera_matrix:
   rows: 3
   cols: 3
