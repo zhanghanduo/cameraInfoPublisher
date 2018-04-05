@@ -51,7 +51,8 @@ public:
 
     ci.header.stamp = imgmsg->header.stamp;
     ci.header.frame_id = imgmsg->header.frame_id;
-    
+
+
     // Publish via image_transport
     pub_cam_info.publish(ci);
   }
