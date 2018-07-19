@@ -49,18 +49,26 @@ public:
       if(n.getParam("height", h_off))
           ROS_INFO("Get height offset: %u", h_off);
 
+      std::string::size_type pos_n = camname.rfind( '_' );
 
-      pub_cam_info = nh_.advertise<sensor_msgs::CameraInfo>(camname + info_topic, 1);
+      if ( pos_n != std::string::npos )
+      {
+
+          pre_camname = camname.substr(0, pos_n);
+          cout << pre_camname << endl;
+      }
+
+      pub_cam_info = nh_.advertise<sensor_msgs::CameraInfo>(pre_camname + info_topic, 1);
 
       if(cut_)
-          pub_cam_info_cut = nh_.advertise<sensor_msgs::CameraInfo>(camname + "_crop" + info_topic, 1);
+          pub_cam_info_cut = nh_.advertise<sensor_msgs::CameraInfo>(pre_camname + "_crop" + info_topic, 1);
 
       sub_img = nh_.subscribe(img_topic, 1, &publishCameraInfo::callback, this);
   }
   void callback(const sensor_msgs::ImageConstPtr& imgmsg)
   {
 
-    const std::string camnameConst = camname;
+    const std::string camnameConst = pre_camname;
 
     const std::string camurlRead = "file://" + ros::package::getPath("undistort_images") + "/calib_files/" + camname + ".yaml";
 
@@ -98,7 +106,7 @@ public:
 
   int x_off, y_off, w_off, h_off;
 
-  string info_topic, camname;
+  string info_topic, camname, pre_camname;
 
 };//End of class
 
