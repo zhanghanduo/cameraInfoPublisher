@@ -17,9 +17,11 @@ http://answers.ros.org/question/53234/processing-an-image-outside-the-callback-f
 class publishCameraInfo
 {
 public:
-  publishCameraInfo(const ros::NodeHandle &nh, const ros::NodeHandle &n): nh_(nh), n_(n)
+  publishCameraInfo(const ros::NodeHandle &nh, const ros::NodeHandle &n):
+  nh_(nh), n_(n), x_off(0), y_off(0), w_off(0), h_off(0), cut_(false), half_(false)
   {
-      string img_topic = "/camera_raw";
+      string img_topic = "/image_raw";
+      info_topic = "/camera_info";
 
       n_.getParam ( "camfile", camname);  //camname is set by:  rosparam set camfile _____
 
@@ -36,6 +38,9 @@ public:
           ROS_INFO("Get cut flag: %s", cut_? "true":"false");
       else
           ROS_WARN("Using default cut flag: false!");
+
+      if(n.getParam("half", half_))
+          ROS_INFO("Get scale half flag: %s", half_? "true":"false");
 
       if(n.getParam("x_offset", x_off))
           ROS_INFO("Get x offset: %u", x_off);
@@ -55,7 +60,8 @@ public:
       {
 
           pre_camname = camname.substr(0, pos_n);
-          cout << pre_camname << endl;
+          ROS_WARN("pre_camname: %s", pre_camname.c_str());
+//          cout << "pre_camname: " << pre_camname << endl;
       }
 
       pub_cam_info = nh_.advertise<sensor_msgs::CameraInfo>(pre_camname + info_topic, 1);
@@ -65,12 +71,18 @@ public:
 
       sub_img = nh_.subscribe(img_topic, 1, &publishCameraInfo::callback, this);
   }
+
   void callback(const sensor_msgs::ImageConstPtr& imgmsg)
   {
 
     const std::string camnameConst = pre_camname;
 
-    const std::string camurlRead = "file://" + ros::package::getPath("undistort_images") + "/calib_files/" + camname + ".yaml";
+    std::string camurlRead;
+
+    if(half_)
+        camurlRead = "file://" + ros::package::getPath("undistort_images") + "/calib_files/" + camname + "_half.yaml";
+    else
+        camurlRead = "file://" + ros::package::getPath("undistort_images") + "/calib_files/" + camname + ".yaml";
 
     camera_info_manager::CameraInfoManager caminfo(nh_, camnameConst, camurlRead);
 
@@ -83,7 +95,14 @@ public:
 
     ci_cut = ci;
 
-    ci_cut.binning_x = ci_cut.binning_y = 1;
+//    ci_cut.binning_x = ci_cut.binning_y = 1;
+    if(half_){
+        h_off = (int)0.5 * h_off;
+        w_off = (int)0.5 * w_off;
+        x_off = (int)0.5 * x_off;
+        y_off = (int)0.5 * y_off;
+    }
+
     ci_cut.roi.height = h_off;
     ci_cut.roi.width = w_off;
     ci_cut.roi.x_offset = x_off;
@@ -102,7 +121,7 @@ public:
   ros::Publisher pub_cam_info_cut;
   ros::Subscriber sub_img;
 
-  bool cut_;
+  bool cut_, half_;
 
   int x_off, y_off, w_off, h_off;
 

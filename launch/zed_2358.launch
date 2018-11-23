@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<launch>
+    <!--<param name="use_sim_time"          value="false" />-->
+    <arg name="info_topic"              value="/camera_info"/>
+    <arg name="left_image_topic"        value="/zed/left/image_raw_color"/>
+    <arg name="right_image_topic"       value="/zed/right/image_raw_color"/>
+    <arg name="queue_size_img"          value="10"/>
+    <arg name="my_ns"                   value="/zed"/>
+
+    <group ns="$(arg my_ns)">
+
+        <node pkg="undistort_images" type="publishCameraInfo" name="publishCameraInfo_left">
+            <param name="topic/info"        value="$(arg info_topic)" />
+            <param name="topic/img"         value="$(arg left_image_topic)" />
+            <param name="camfile"           value="left_zed_2358rect" />
+            <param name="queue_size/img"    value="$(arg queue_size_img)" />
+            <param name="half"              value="false" />
+            <param name="cut"               value="true" />
+            <!--ignored if cut is set to false, value is before scaling-->
+            <param name="x_offset"          type="int" value="60" />
+            <param name="y_offset"          type="int" value="100" />
+            <param name="width"             type="int" value="1160" />
+            <param name="height"            type="int" value="520" />
+        </node>
+
+        <node pkg="undistort_images" type="publishCameraInfo" name="publishCameraInfo_right">
+            <param name="topic/info"        value="$(arg info_topic)" />
+            <param name="topic/img"         value="$(arg right_image_topic)" />
+            <param name="camfile"           value="right_zed_2358rect" />
+            <param name="queue_size/img"    value="$(arg queue_size_img)" />
+            <param name="half"              value="false" />
+            <param name="cut"               value="true" />
+            <!--ignored if cut is set to false, value is before scaling-->
+            <param name="x_offset"          type="int" value="60" />
+            <param name="y_offset"          type="int" value="100" />
+            <param name="width"             type="int" value="1160" />
+            <param name="height"            type="int" value="520" />
+        </node>
+
+    </group>
+
+    <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc">
+        <remap from="/left/image_raw"    to="$(arg left_image_topic)" />
+        <remap from="/right/image_raw"   to="$(arg right_image_topic)" />
+        <remap from="/left/camera_info"  to="/zed/left_zed/camera_info" />
+        <remap from="/right/camera_info" to="/zed/right_zed/camera_info" />
+        <remap from="/left/image_rect" to="$(arg my_ns)/left/image_rect" />
+        <remap from="/right/image_rect" to="$(arg my_ns)/right/image_rect" />
+    </node>
+
+    <!--<node pkg="hector_trajectory_server" type="hector_trajectory_server" name="trajectory_server_for_slam" output="screen" >-->
+        <!--<param name="/target_frame_name" value="map" />-->
+        <!--<param name="/source_frame_name" value="zed_camera_center" />-->
+        <!--<param name="/trajectory_update_rate" value="20.0" />-->
+        <!--<param name="/trajectory_publish_rate" value="20.0" />-->
+    <!--</node>-->
+
+    <!--<node pkg="nodelet" type="nodelet"-->
+          <!--args="standalone image_proc/crop_decimate"-->
+          <!--name="left_decimator">-->
+        <!--<param name="x_offset" type="int" value="0" />-->
+        <!--<param name="y_offset" type="int" value="50" />-->
+        <!--&lt;!&ndash;<param name="decimation_x" type="int" value="2" />&ndash;&gt;-->
+        <!--&lt;!&ndash;<param name="decimation_y" type="int" value="2" />&ndash;&gt;-->
+        <!--<param name="width" type="int" value="1280" />-->
+        <!--<param name="height" type="int" value="620" />-->
+
+        <!--&lt;!&ndash; remap input topics &ndash;&gt;-->
+        <!--<remap from="camera/image_raw" to="/zed/left/image_rect" />-->
+        <!--<remap from="camera/camera_info" to="/zed/left_zed/camera_info" />-->
+
+        <!--&lt;!&ndash; remap output topics &ndash;&gt;-->
+        <!--<remap from="camera_out/image_raw" to="/zed/left_crop/image_rect" />-->
+        <!--<remap from="camera_out/camera_info" to="/zed/left_crop/camera_info" />-->
+    <!--</node>-->
+
+    <!--&lt;!&ndash; Crop right image &ndash;&gt;-->
+    <!--<node pkg="nodelet" type="nodelet"-->
+          <!--args="standalone image_proc/crop_decimate"-->
+          <!--name="right_decimator">-->
+        <!--<param name="x_offset" type="int" value="0" />-->
+        <!--<param name="y_offset" type="int" value="50" />-->
+        <!--&lt;!&ndash;<param name="decimation_x" type="int" value="2" />&ndash;&gt;-->
+        <!--&lt;!&ndash;<param name="decimation_y" type="int" value="2" />&ndash;&gt;-->
+        <!--<param name="width" type="int" value="1280" />-->
+        <!--<param name="height" type="int" value="620" />-->
+
+        <!--&lt;!&ndash; remap input topics &ndash;&gt;-->
+        <!--<remap from="camera/image_raw" to="/zed/right/image_rect" />-->
+        <!--<remap from="camera/camera_info" to="/zed/right/camera_info" />-->
+
+        <!--&lt;!&ndash; remap output topics &ndash;&gt;-->
+        <!--<remap from="camera_out/image_raw" to="/zed/right_crop/image_rect" />-->
+        <!--<remap from="camera_out/camera_info" to="/zed/right_crop/camera_info" />-->
+    <!--</node>-->
+
+
+</launch>

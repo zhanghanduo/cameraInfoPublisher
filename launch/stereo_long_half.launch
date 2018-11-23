@@ -4,8 +4,7 @@
     <arg name="info_topic"              value="/camera_info"/>
     <arg name="left_image_topic"        value="/long/left/image_raw"/>
     <arg name="right_image_topic"       value="/long/right/image_raw"/>
-    <arg name="queue_size_img"          value="1"/>
-    <arg name="queue_size_imu"          value="10"/>
+    <arg name="queue_size_img"          value="10"/>
     <arg name="my_ns"                   value="/long"/>
 
     <group ns="$(arg my_ns)">
@@ -15,7 +14,6 @@
             <param name="topic/img"         value="$(arg left_image_topic)" />
             <param name="camfile"           value="left_half" />
             <param name="queue_size/img"    value="$(arg queue_size_img)" />
-            <param name="queue_size/imu"    value="$(arg queue_size_imu)" />
             <param name="cut"               value="false" />
         </node>
 
@@ -24,15 +22,14 @@
             <param name="topic/img"         value="$(arg right_image_topic)" />
             <param name="camfile"           value="right_half" />
             <param name="queue_size/img"    value="$(arg queue_size_img)" />
-            <param name="queue_size/imu"    value="$(arg queue_size_imu)" />
             <param name="cut"               value="false" />
         </node>
 
         <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc">
-            <remap from="/stereo/left/image_raw"    to="/long/left/image_raw" />
-            <remap from="/stereo/right/image_raw"   to="/long/right/image_raw" />
-            <remap from="/stereo/left/camera_info"  to="/long/left/camera_info" />
-            <remap from="/stereo/right/camera_info" to="/long/right/camera_info" />
+            <remap from="/stereo/left/image_raw"    to="$(arg left_image_topic)" />
+            <remap from="/stereo/right/image_raw"   to="$(arg right_image_topic)" />
+            <remap from="/stereo/left/camera_info"  to="$(arg my_ns)/left$(arg info_topic)" />
+            <remap from="/stereo/right/camera_info" to="$(arg my_ns)/right$(arg info_topic)" />
         </node>
 
     </group>
