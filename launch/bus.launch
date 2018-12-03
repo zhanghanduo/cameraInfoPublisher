@@ -18,8 +18,8 @@
             <!--ignored if cut is set to false-->
             <param name="x_offset"          type="int" value="0" />
             <param name="y_offset"          type="int" value="50" />
-            <param name="width"             type="int" value="640" />
-            <param name="height"            type="int" value="322" />
+            <param name="width"             type="int" value="1920" />
+            <param name="height"            type="int" value="1208" />
         </node>
 
         <node pkg="undistort_images" type="publishCameraInfo" name="publishCameraInfo_right">
@@ -31,8 +31,8 @@
             <!--ignored if cut is set to false-->
             <param name="x_offset"          type="int" value="0" />
             <param name="y_offset"          type="int" value="50" />
-            <param name="width"             type="int" value="640" />
-            <param name="height"            type="int" value="322" />
+            <param name="width"             type="int" value="1920" />
+            <param name="height"            type="int" value="1208" />
 
         </node>
 

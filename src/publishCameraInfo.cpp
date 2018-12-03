@@ -93,8 +93,6 @@ public:
     ci.header.stamp = imgmsg->header.stamp;
     ci.header.frame_id = imgmsg->header.frame_id;
 
-    ci_cut = ci;
-
 //    ci_cut.binning_x = ci_cut.binning_y = 1;
     if(half_){
         h_off = (int)0.5 * h_off;
@@ -103,11 +101,14 @@ public:
         y_off = (int)0.5 * y_off;
     }
 
-    ci_cut.roi.height = h_off;
-    ci_cut.roi.width = w_off;
-    ci_cut.roi.x_offset = x_off;
-    ci_cut.roi.y_offset = y_off;
-    ci_cut.roi.do_rectify = cut_;
+    if(cut_) {
+        ci_cut = ci;
+        ci_cut.roi.height = h_off;
+        ci_cut.roi.width = w_off;
+        ci_cut.roi.x_offset = x_off;
+        ci_cut.roi.y_offset = y_off;
+        ci_cut.roi.do_rectify = cut_;
+    }
 
     // Publish via image_transport
     pub_cam_info.publish(ci);
